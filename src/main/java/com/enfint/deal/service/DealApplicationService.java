@@ -148,6 +148,9 @@ public class DealApplicationService implements Helper {
         log.info("creating credit entity");
         Credit createCredit=fillCredit(credit);
         creditRepositoty.save(createCredit);
+
+        getApplication.setCredit(createCredit);
+        applicationRepository.save(getApplication);
         log.info("CREDIT DATA:{}", createCredit);
         log.info("REQUEST EXECUTED");
         log.info(LINE);
@@ -188,7 +191,7 @@ public class DealApplicationService implements Helper {
         return storeData;
     }
 
-    private Client createClient(LoanApplicationRequestDTO reg)
+    public Client createClient(LoanApplicationRequestDTO reg)
     {
         Client client= new Client();
         client.setLastName(reg.getLastName());
