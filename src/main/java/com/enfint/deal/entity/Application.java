@@ -23,7 +23,7 @@ import java.util.List;
 public class Application {
 
     @Id
-    @Column(name="applocation_Id")
+    @Column(name="application_Id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long applicationId;
 
@@ -53,7 +53,7 @@ public class Application {
 
     @Type(type ="json")
     @Column(name="status_history", columnDefinition = "json")
-    private List<ApplicationStatusHistoryDTO> statusHistoryy;
+    private List<ApplicationStatusHistoryDTO> statusHistory;
 
 
 }

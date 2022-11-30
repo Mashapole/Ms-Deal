@@ -18,7 +18,7 @@ import java.time.LocalDate;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name="Client")
+@Table(name="client")
 @Entity
 @TypeDef(name="json", typeClass = JsonBinaryType.class)
 public class Client {
@@ -57,7 +57,7 @@ public class Client {
     private Passport passport;
 
     @Type(type="json")
-    @Column(name="employement",columnDefinition = "json")
+    @Column(name="employment",columnDefinition = "json")
     private EmploymentDTO employement;
 
     @Column(name="account")

@@ -17,5 +17,4 @@ public class DealApplication {
         log.info("The ms-deal has started");
         log.info("----------------------------");
 	}
-
 }

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd">
+
+    <changeSet id="1" author="smith">
+
+        <preConditions onError="WARN">
+            <not>
+                <tableExists tableName="client"/>
+            </not>
+        </preConditions>
+        <createTable tableName="client" schemaName="public">
+            <column name="client_Id" type="bigint">
+                <constraints primaryKey="true" primaryKeyName="pk_client_Id"/>
+            </column>
+            <column name="last_name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="middle_name" type="varchar(50)">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="birth_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="email" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="gender" type="int"/>
+
+            <column name="marital_status" type="int"/>
+
+            <column name="dependent_number" type="int"/>
+
+            <column name="passport" type="json"/>
+
+            <column name="employment" type="json"/>
+
+            <column name="account" type="varchar(20)"/>
+
+        </createTable>
+        <addAutoIncrement tableName="client" columnName="client_Id" columnDataType="int"  startWith="1" incrementBy="1" />
+    </changeSet>
+
+
+    <changeSet id="2" author="smith">
+        <preConditions onError="WARN">
+            <not>
+                <tableExists tableName="credit"/>
+            </not>
+        </preConditions>
+        <createTable tableName="credit" schemaName="public" >
+            <column name="credit_id" type="bigint">
+                <constraints primaryKey="true" primaryKeyName="pk_credit_id"/>
+            </column>
+            <column name="amount" type="numeric(8,2)"/>
+            <column name="term" type="int"/>
+            <column name="monthly_payment"  type="numeric(8,2)"/>
+            <column name="rate" type="numeric(8,2)"/>
+            <column name="flc" type="numeric(8,2)"/>
+            <column name="payment_schedule" type="json"/>
+            <column name="is_insurance_enabled" type="boolean"/>
+            <column name="is_salary_client" type="boolean"/>
+        </createTable>
+
+        <addAutoIncrement tableName="credit" columnName="credit_id" columnDataType="int" startWith="1" incrementBy="1" />
+
+    </changeSet>
+
+    <changeSet id="3" author="smith" >
+        <preConditions onError="WARN">
+            <not>
+                <tableExists tableName="application"/>
+            </not>
+        </preConditions>
+        <createTable tableName="application" schemaName="public" >
+            <column name="application_Id" type="bigint">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="client_Id" type="bigint"/>
+
+            <column name="credit_id" type="bigint"/>
+
+            <column name="status" type="int"/>
+
+            <column name="creation_date" type="date"/>
+
+            <column name="applied_offer" type="json"/>
+
+            <column name="sign_date" type="date"/>
+
+            <column name="ses_code" type="bigint"/>
+
+            <column name="status_history" type="json"/>
+        </createTable>
+
+        <addAutoIncrement tableName="application" columnName="application_Id" columnDataType="int" schemaName="public"  startWith="1" incrementBy="1" />
+        <addForeignKeyConstraint baseTableName="application" baseColumnNames="client_Id"  constraintName="fk_client_Id" referencedTableName="client" referencedColumnNames="client_Id" onDelete="CASCADE" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="application" baseColumnNames="credit_id" constraintName="fk_credit_Id" referencedTableName="credit" referencedColumnNames="credit_id" onDelete="CASCADE" onUpdate="RESTRICT"/>
+    </changeSet>
+</databaseChangeLog>

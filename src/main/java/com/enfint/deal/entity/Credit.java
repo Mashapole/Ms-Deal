@@ -15,7 +15,7 @@ import java.util.List;
 
 
 @Entity
-@Table(name="Credit")
+@Table(name="credit")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

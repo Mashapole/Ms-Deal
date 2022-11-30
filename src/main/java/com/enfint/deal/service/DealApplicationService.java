@@ -113,7 +113,7 @@ public class DealApplicationService implements Helper {
 
 
         application.setStatus(ApplicationStatus.APPROVED);
-        application.setStatusHistoryy(stat);
+        application.setStatusHistory(stat);
         application.setAppliedOffer(loanOfferDTO);
         final Application app=applicationRepository.save(application);
         log.info("Application Information is updated and saved to DB");
