@@ -2,6 +2,7 @@ package com.enfint.deal.service;
 
 import com.enfint.deal.dto.*;
 import com.enfint.deal.dto.enumm.ChangeType;
+import com.enfint.deal.dto.enumm.Theme;
 import com.enfint.deal.entity.Application;
 import com.enfint.deal.entity.Client;
 import com.enfint.deal.entity.Credit;
@@ -12,6 +13,7 @@ import com.enfint.deal.feign.FeignServiceUntil;
 import com.enfint.deal.repository.ApplicationRepository;
 import com.enfint.deal.repository.ClientRepository;
 import com.enfint.deal.repository.CreditRepositoty;
+import com.enfint.deal.service.Kafka.Producer;
 import com.enfint.deal.service.implementations.Helper;
 import com.enfint.deal.validation.Validate;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,12 +38,18 @@ public class DealApplicationService implements Helper {
     CreditRepositoty creditRepositoty;
 
     @Autowired
+    protected DocumentService documentService;
+
+    @Autowired
     protected ClientRepository clientRepository;
     @Autowired
     protected ApplicationRepository applicationRepository;
 
     @Autowired
     protected FeignServiceUntil feignServiceUntil;
+
+    @Autowired
+    protected Producer producer;
 
     private static final String LINE ="------------------------------";
     private static final String EXECUTED="Execution Completed";
@@ -109,10 +118,8 @@ public class DealApplicationService implements Helper {
                 orElseThrow(()->new EntityNotFoundException("Request No Found"));
 
         List<ApplicationStatusHistoryDTO> stat= new ArrayList<>();
-        stat.add(new ApplicationStatusHistoryDTO(ApplicationStatus.APPROVED, LocalDateTime.now(), ChangeType.APPROVED));
+        stat.add(new ApplicationStatusHistoryDTO(ApplicationStatus.APPROVED, LocalDateTime.now(), ChangeType.MANUAL));
 
-
-        application.setStatus(ApplicationStatus.APPROVED);
         application.setStatusHistory(stat);
         application.setAppliedOffer(loanOfferDTO);
         final Application app=applicationRepository.save(application);
@@ -120,9 +127,19 @@ public class DealApplicationService implements Helper {
         log.info("TABLE DATA IS:{}", app);
         log.info(LINE);
 
+        documentService.prepareDocument(application.getApplicationId());
+        log.info("-----MESSAGE FINISH REGISTRATION------");
+        EmailMessage emailMessage= new EmailMessage();
+        emailMessage.setApplicationId(application.getApplicationId());
+        emailMessage.setTheme(Theme.FINISH_REGISTRATION);
+        emailMessage.setAddress(application.getClientId().getEmail());
+        producer.message(emailMessage);
+        log.info("Message{}:", emailMessage);
+
     }
 
     @Override
+    @Transactional
     public void registrationCompletion(Long applicationId,ScoringDataDTO scoringDataDTO)
     {
         log.info(LINE);
@@ -149,11 +166,20 @@ public class DealApplicationService implements Helper {
         Credit createCredit=fillCredit(credit);
         creditRepositoty.save(createCredit);
 
+        getApplication.setStatus(ApplicationStatus.CC_APPROVED);
         getApplication.setCredit(createCredit);
         applicationRepository.save(getApplication);
         log.info("CREDIT DATA:{}", createCredit);
         log.info("REQUEST EXECUTED");
         log.info(LINE);
+
+        log.info("-----MESSAGE CREATE DOCUMENT------");
+        EmailMessage emailMessage= new EmailMessage();
+        emailMessage.setApplicationId(getApplication.getApplicationId());
+        emailMessage.setTheme(Theme.CREATE_DOCUMENTS);
+        emailMessage.setAddress(getApplication.getClientId().getEmail());
+        producer.message(emailMessage);
+        log.info("Message{}:", emailMessage);
     }
 
     private Credit fillCredit(CreditDTO credit) {
